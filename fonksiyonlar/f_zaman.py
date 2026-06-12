@@ -1,5 +1,5 @@
 import time  # Zaman
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from datetime import date
 
 def Bekle(Sure: int):
@@ -15,5 +15,13 @@ def Gun():
 
 def GunSaat():
     return Gun() + " " + Saat()
+
+def Gmt():
+    return datetime.now(timezone.utc)
+
+def IstanbulSaat():
+    gmt_zamani = datetime.now(timezone.utc)
+    istanbul_farki = timedelta(hours=3)
+    return gmt_zamani + istanbul_farki
 
 def TimeStamp_GunFormat(timeStamp): return datetime.fromtimestamp(int(timeStamp) / 1000)
