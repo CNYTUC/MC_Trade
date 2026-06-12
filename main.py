@@ -7,81 +7,156 @@ from modules.veri import tum_hisselerin_verisini_cek
 from modules.veri import veri_durumlarini_yazdir
 
 # 0) Hoşgeldiniz
+# 1) İstanbul Saati Al
+IstSaat = f_zaman.IstanbulZamanSTR()
 
-print("🚀 MC Test Başlatıldı!\n")
+print(f"Zaman: {IstSaat}\n🚀 MC Test Başlatıldı!\n")
 
-# 1) INTERNET SINAMASI
-
+# Donguyu Başlat
 while True:
 
-    if f_int.kontrol():
+    # 0) ZAMAN KONTROL
+    zaman_kontrol = False
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    if zaman_kontrol:
 
-        Msj = f"⏱️ İnternet bağlantısı aktif, borsa sunucusuna erişilebilir."
-        print(f_str.MsjBasari(Msj))
+        saat = int(f_zaman.IstanbulSaat())
+        dakika = int(f_zaman.IstanbulDakika())
 
-        break
+        # Eğer saat 17:15'ten erken ise...
+        if saat < 17 or (saat == 17 and dakika < 15):
+            print(f"⏰ Saat henüz {saat:02d}:{dakika:02d}. İşlem için 17:15 bekleniyor...")
 
-    Msj: str = f"❌ Başarısız: Bağlantı hatası! 5 sn içinde tekrar denenecek!!!"
-    print(f_str.MsjIkaz(Msj))
+            # İşlemcinin yorulmaması için bekleme
+            f_zaman.Bekle(10)
 
-    x = f_zaman.Bekle(5)
+            continue  # Döngünün en başına döner
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
 
-# 2) Adına işlem yapılacak Kullanıcı Sayısını Al
+    # 1) INTERNET KONTROL
+    internet_kontrol = True
+    ust_donguye_gec = False  # Kontrol bayrağını en dışta tanımlıyoruz
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    if internet_kontrol:
 
-conf.tum_kullanicilar = sbase.get_all_users()
-i = 0
-for kullanici in conf.tum_kullanicilar:
-    i = i + 1
+        # RİSK ÇÖZÜLDÜ: Ay ve günü toplamak yerine yan yana birleştirip (örn: "0524" -> 524) benzersiz bir sayı yapıyoruz
+        ilk_kontrol_tarih = int(f"{f_zaman.IstanbulAy()}{f_zaman.IstanbulGun()}")
 
-if i == 0:
-    Msj: str = f"❌ Başarısız: Adına işlem yapılacak kullanıcı bulunamadı!!!"
-    print(f_str.MsjHata(Msj))
-else:
-    Msj = f"{i} kullanıcı için işlem başlatılıyor."
-    print(f_str.MsjBasari(Msj))
+        while True:
+            # En hızlı servisler öncelikli kontrol ediliyor
+            internet_var_mi = f_int.kontrolByGoogle() or f_int.kontrolByhttpbin()
 
+            if internet_var_mi:
+                Msj = "🌐 İnternet bağlantısı aktif, sistem hazır."
+                print(f_str.MsjBasari(Msj))
+                break  # İçteki internet döngüsünü kırar, dıştaki akışa geçer
 
-# 3) Hisse Senedi Listesini Çek
+            else:
+                # Güncel tarihi yine birleşik sayı olarak alıyoruz
+                Yeni_kontrol_tarih = int(f"{f_zaman.IstanbulAy()}{f_zaman.IstanbulGun()}")
 
-conf.tum_hisseler = sbase.get_all_bist()
+                if ilk_kontrol_tarih == Yeni_kontrol_tarih:
+                    Msj = "❌ Başarısız: Bağlantı hatası! Ertesi güne kadar, 5 sn ara ile tekrar denenecek!!!"
+                    print(f_str.MsjIkaz(Msj))
+                    f_zaman.Bekle(5)
+                else:
+                    # Gün kesinlikle değişti (Ay geçişleri dahil asla çakışmaz)
+                    ust_donguye_gec = True
+                    break  # İçteki internet döngüsünü kırar
 
-# 4) Hisse Senedi verilerini
-
-i = 0
-
-for x in conf.tum_hisseler:
-    i += 1
-
-if i == 0:
-    Msj = "❌ Başarısız: İşlem yapılacak hisse bulunamadı!!!"
-    print(f_str.MsjHata(Msj))
-
-else:
-    Msj = f"{i} Hisse Senedi bulundu."
-    print(f_str.MsjBasari(Msj))
-
-    (
-        conf.hisse_verileri,
-        conf.veri_durumlari,
-        conf.basarili_hisseler,
-        conf.veri_hatalari
-    ) = tum_hisselerin_verisini_cek(
-        conf.tum_hisseler,
-        gun=300
-    )
-
-    veri_durumlarini_yazdir(conf.veri_durumlari)
-
-    print()
-    print(f_str.MsjBasari(
-        f"{len(conf.basarili_hisseler)} hissenin verisi çekildi."
-    ))
-
-    print(f_str.MsjIkaz(
-        f"{len(conf.basarisiz_hisseler)} hissede veri alınamadı."
-    ))
+    # >>> DOĞRU YER: İç döngü tamamen bittikten sonra ana while hizasında kontrol ediyoruz <<<
+    if ust_donguye_gec:
+        print("🔄 Gün değiştiği için sistem ana döngünün başına yönlendiriliyor...")
+        continue  # Ana 'while True' döngüsünün en başına zıplar
 
 
 
 
+
+
+
+
+
+
+    # -----------------------------------------------------------------------------
+    # 2) BORSA İŞLEMLERİ (İnternet başarıyla bağlandıysa kod buraya ulaşır)
+    # -----------------------------------------------------------------------------
+    print("🚀 Başarılı! İnternet var ve zaman uygun. Borsa emirleri tetikleniyor...")
+
+    # Not: Eğer borsa kodlarının da sonsuza kadar dönmesini istemiyorsanız,
+    # iş bitiminde buraya ana döngüyü kıracak bir 'break' koyabilirsiniz.
+
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+
+
+
+
+#
+#
+# # 2) Adına işlem yapılacak Kullanıcı Sayısını Al
+#
+# conf.tum_kullanicilar = sbase.get_all_users()
+# i = 0
+# for kullanici in conf.tum_kullanicilar:
+#     i = i + 1
+#
+# if i == 0:
+#     Msj: str = f"❌ Başarısız: Adına işlem yapılacak kullanıcı bulunamadı!!!"
+#     print(f_str.MsjHata(Msj))
+# else:
+#     Msj = f"{i} kullanıcı için işlem başlatılıyor."
+#     print(f_str.MsjBasari(Msj))
+#
+#
+# # 3) Hisse Senedi Listesini Çek
+#
+# conf.tum_hisseler = sbase.get_all_bist()
+#
+# # 4) Hisse Senedi verilerini
+#
+# i = 0
+#
+# for x in conf.tum_hisseler:
+#     i += 1
+#
+# if i == 0:
+#     Msj = "❌ Başarısız: İşlem yapılacak hisse bulunamadı!!!"
+#     print(f_str.MsjHata(Msj))
+#
+# else:
+#     Msj = f"{i} Hisse Senedi bulundu."
+#     print(f_str.MsjBasari(Msj))
+#
+#     (
+#         conf.hisse_verileri,
+#         conf.veri_durumlari,
+#         conf.basarili_hisseler,
+#         conf.veri_hatalari
+#     ) = tum_hisselerin_verisini_cek(
+#         conf.tum_hisseler,
+#         gun=300
+#     )
+#
+#     veri_durumlarini_yazdir(conf.veri_durumlari)
+#
+#     print()
+#     print(f_str.MsjBasari(
+#         f"{len(conf.basarili_hisseler)} hissenin verisi çekildi."
+#     ))
+#
+#     print(f_str.MsjIkaz(
+#         f"{len(conf.basarisiz_hisseler)} hissede veri alınamadı."
+#     ))
+#
+#
+#
+#
 
