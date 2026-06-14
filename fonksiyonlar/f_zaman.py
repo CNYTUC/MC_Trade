@@ -1,4 +1,5 @@
 import time  # Zaman
+import conf
 from datetime import datetime, timezone, timedelta
 from datetime import date
 
@@ -21,7 +22,7 @@ def Gmt():
 
 def IstanbulZamanSTR():
     gmt_zamani = datetime.now(timezone.utc)
-    istanbul_farki = timedelta(hours=3)
+    istanbul_farki = timedelta(hours=conf.spbase.gtm_ist_fark)
     istanbul_zamani = gmt_zamani + istanbul_farki
     return istanbul_zamani.strftime("%Y-%m-%d %H:%M:%S")
 

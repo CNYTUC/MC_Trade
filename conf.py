@@ -1,3 +1,7 @@
+# LOG KAYITLARI
+# TARIH - SAAT - USER - OLAY
+# log_kayitlari = None
+
 # Tüm kullanıcı verilerini alır
 # ------------------------------------------------------------------
 tum_kullanicilar = None
@@ -26,7 +30,6 @@ basarisiz_hisseler = None
 #   {"Kod": "THYAO", "Durum": "✅"},
 #   {"Kod": "ADLVY", "Durum": "❌"}
 # ]
-
 veri_durumlari = None
 
 # ANALİZ İÇİN KULLANILAN DEĞİŞKENLER
@@ -34,3 +37,9 @@ veri_durumlari = None
 analiz_sonuclari = None
 elenenler = None
 analiz_hatalari = None
+
+class spbase:
+
+    # GMT ISTANBUL FARKI
+    gtm_ist_fark = 3
+
