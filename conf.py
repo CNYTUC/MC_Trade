@@ -38,6 +38,11 @@ analiz_sonuclari = None
 elenenler = None
 analiz_hatalari = None
 
+
+
+
+
+
 class spbase:
 
     # GMT ISTANBUL FARKI
