@@ -1,5 +1,6 @@
 import pandas as pd
 import yfinance as yf
+from fonksiyonlar import ZamanIslem as f_zaman
 
 # Hisse senedi listesi çekerken mesajları gizler
 # import logging
@@ -82,9 +83,12 @@ def veri_cek(kod, gun=300):
         for col in df.columns:
             df[col] = squeeze(df[col])
 
+        f_zaman.Bekle(0.5)
         return df
 
     except Exception:
+
+        f_zaman.Bekle(0.5)
         return None
 
 

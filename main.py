@@ -311,8 +311,19 @@ while True:
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
+    analiz.analiz_sonuclarini_yazdir(conf.analiz_sonuclari)
 
-    analiz.tum_hisseleri_analiz_et(conf.hisse_verileri)
+    print("\nELENENLER")
+    print("-" * 30)
+    for sebep, adet in conf.elenenler.items():
+        print(f"{sebep:20}: {adet}")
+
+    if len(conf.analiz_hatalari) > 0:
+        print("\nANALİZ HATALARI")
+        print("-" * 30)
+        for hata in conf.analiz_hatalari:
+            print(hata)
+
 
 
 
