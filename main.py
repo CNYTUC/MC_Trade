@@ -4,7 +4,8 @@ from fonksiyonlar import InternetIslem as f_int
 from fonksiyonlar import StringIslem as f_str
 from fonksiyonlar import ZamanIslem as f_zaman
 
-
+import modules.veri as veri
+import modules.analiz as analiz
 import modules.supabaseFnks as sbase
 
 
@@ -151,47 +152,51 @@ while True:
 
 
 
-    # 2.3) ZAMAN KONTROL
-    # -----------------------------------------------------------------------------
-    # -----------------------------------------------------------------------------
-    # -----------------------------------------------------------------------------
-
-    # İŞLEMİN BAŞLAYACAĞI SAATİ VE GMT IST FARKINI SUPABASE'DEN ÇEK
-    conf.gtm_ist_fark = int(sbase.get_set_by_key("gtm_ist_fark"))  # ÖR: 3
-    conf.islem_SaatDakika = f_zaman.saate_cevir(sbase.get_set_by_key("islem_SaatDakika"))
-
-    islem_saat = conf.islem_SaatDakika #17:15
-    while True:
-
-        aktif_Saat = f_zaman.saate_cevir(f_zaman.IstanbulSaat())  # Örneğin 16:45
-
-        if aktif_Saat >= islem_saat:
-
-            Msj = "⏰ Saat geçerli, sistem hazır..."
-            print(f_str.MsjBasari(Msj))
-
-            break
-
-        else:
-
-            saat_farki_dakika = f_zaman.saat_farki_hesapla(islem_saat, aktif_Saat)
-
-            # Olası bir hesaplama hatasına karşı koruma (Negatif değer kontrolü)
-            if saat_farki_dakika <= 0:
-                break
-
-            Msj = f"⏰ Saat henüz {aktif_Saat}. İşlem için {islem_saat} bekleniyor... (Kalan: {saat_farki_dakika} dk)\n5dk sonra tekrar denenecek..."
-
-            f_zaman.Bekle(5 * 60)
-
-        if f_zaman.gun_degisti_mi(dongu_tarihi):
-            print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
-            ust_donguyu_basa_sar = True
-            break  # İç döngüyü tamamen kırar ve dışarı fırlatır
-
-    # İç döngü kırıldıktan sonra buraya gelir:
-    if ust_donguyu_basa_sar:
-        continue  # İşte bu komut
+    # # 2.3) SAAT KONTROL
+    # # -----------------------------------------------------------------------------
+    # # -----------------------------------------------------------------------------
+    # # -----------------------------------------------------------------------------
+    #
+    # # İŞLEMİN BAŞLAYACAĞI SAATİ VE GMT IST FARKINI SUPABASE'DEN ÇEK
+    # conf.gtm_ist_fark = int(sbase.get_set_by_key("gtm_ist_fark"))  # ÖR: 3
+    # conf.islem_SaatDakika = f_zaman.saate_cevir(sbase.get_set_by_key("islem_SaatDakika"))
+    #
+    # islem_saat = conf.islem_SaatDakika #17:15
+    # while True:
+    #
+    #     aktif_Saat = f_zaman.saate_cevir(f_zaman.IstanbulSaat())  # Örneğin 16:45
+    #
+    #     if aktif_Saat >= islem_saat:
+    #
+    #         Msj = "⏰ Saat geçerli, sistem hazır..."
+    #         print(f_str.MsjBasari(Msj))
+    #
+    #         break
+    #
+    #     else:
+    #
+    #         saat_farki_dakika = f_zaman.saat_farki_hesapla(islem_saat, aktif_Saat)
+    #
+    #         # Olası bir hesaplama hatasına karşı koruma (Negatif değer kontrolü)
+    #         if saat_farki_dakika <= 0:
+    #             break
+    #
+    #         Msj = f"⏰ Saat henüz {aktif_Saat}. İşlem için {islem_saat} bekleniyor... (Kalan: {saat_farki_dakika} dk)\n5dk sonra tekrar denenecek..."
+    #
+    #         f_zaman.Bekle(5 * 60)
+    #
+    #     if f_zaman.gun_degisti_mi(dongu_tarihi):
+    #         print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
+    #         ust_donguyu_basa_sar = True
+    #         break  # İç döngüyü tamamen kırar ve dışarı fırlatır
+    #
+    # # İç döngü kırıldıktan sonra buraya gelir:
+    # if ust_donguyu_basa_sar:
+    #     continue  # İşte bu komut
+    #
+    # # -----------------------------------------------------------------------------
+    # # -----------------------------------------------------------------------------
+    # # -----------------------------------------------------------------------------
 
 
 
@@ -249,7 +254,7 @@ while True:
         conf.tum_hisseler = sbase.get_all_bist()
         HisseSenediListeSayisi = len(conf.tum_hisseler)
 
-        if not HisseSenediListeSayisi == 0:
+        if HisseSenediListeSayisi > 0:
 
             Msj = f"✅ {HisseSenediListeSayisi} Hisse senedi değerlendirilecek."
             print(f_str.MsjBasari(Msj))
@@ -276,7 +281,11 @@ while True:
     # -----------------------------------------------------------------------------
 
 
+    #ANA İŞLEMLERİ BAŞLAT
 
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
 
     # 5) HİSSE SENEDİ VERİLERİNİ ÇEK
     # -----------------------------------------------------------------------------
@@ -289,77 +298,24 @@ while True:
 
 
 
+    #Supabase'den çektiğiniz conf.tum_hisseler listesini fonksiyona gönderiyoruz
+    conf.hisse_verileri, conf.veri_durumlari, conf.basarili_hisseler, conf.basarisiz_hisseler = veri.tum_hisselerin_verisini_cek(conf.tum_hisseler, gun=300)
 
-        #(
-        #    conf.hisse_verileri,
-        #    conf.veri_durumlari,
-        #    conf.basarili_hisseler,
-        #    conf.veri_hatalari
-        #) = tum_hisselerin_verisini_cek(
-        #    conf.tum_hisseler,
-        #    gun=300
-        #    )
-    #
-    #     veri_durumlarini_yazdir(conf.veri_durumlari)
-    #
-    #     print()
-    #     print(f_str.MsjBasari(
-    #         f"{len(conf.basarili_hisseler)} hissenin verisi çekildi."
-    #     ))
-    #
-    #     print(f_str.MsjIkaz(
-    #         f"{len(conf.basarisiz_hisseler)} hissede veri alınamadı."
-    #     ))
-    #
-    #
-    #
-    #
+    # Başarı durumlarını ekrana yazdırıyoruz
+    veri.veri_durumlarini_yazdir(conf.veri_durumlari)
+    print(f_str.MsjBasari(f"{len(conf.basarili_hisseler)} hissenin verisi çekildi."))
+    print(f_str.MsjIkaz(f"{len(conf.basarisiz_hisseler)} hissede veri alınamadı."))
+
+    # ANALIZE BAŞLA
+
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+
+    analiz.tum_hisseleri_analiz_et(conf.hisse_verileri)
 
 
 
 
 
-
-
-
-
-# # 4) Hisse Senedi verilerini
-#
-# i = 0
-#
-# for x in conf.tum_hisseler:
-#     i += 1
-#
-# if i == 0:
-#     Msj = "❌ Başarısız: İşlem yapılacak hisse bulunamadı!!!"
-#     print(f_str.MsjHata(Msj))
-#
-# else:
-#     Msj = f"{i} Hisse Senedi bulundu."
-#     print(f_str.MsjBasari(Msj))
-#
-#     (
-#         conf.hisse_verileri,
-#         conf.veri_durumlari,
-#         conf.basarili_hisseler,
-#         conf.veri_hatalari
-#     ) = tum_hisselerin_verisini_cek(
-#         conf.tum_hisseler,
-#         gun=300
-#     )
-#
-#     veri_durumlarini_yazdir(conf.veri_durumlari)
-#
-#     print()
-#     print(f_str.MsjBasari(
-#         f"{len(conf.basarili_hisseler)} hissenin verisi çekildi."
-#     ))
-#
-#     print(f_str.MsjIkaz(
-#         f"{len(conf.basarisiz_hisseler)} hissede veri alınamadı."
-#     ))
-#
-#
-#
-#
 

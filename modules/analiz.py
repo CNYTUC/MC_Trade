@@ -1,5 +1,7 @@
 import pandas as pd
 
+# YARDIMCILAR
+
 def squeeze(s):
     if hasattr(s, "squeeze"):
         s = s.squeeze()
@@ -9,10 +11,18 @@ def squeeze(s):
 
     return s
 
-
 def ema(seri, periyot):
     return squeeze(seri).ewm(span=periyot, adjust=False).mean()
 
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+
+
+
+
+#ASIL FONKSIYONLAR
 
 def atr_hesapla(df, periyot=14):
     close = squeeze(df["Close"])
@@ -136,6 +146,16 @@ def varsayilan_parametreler():
         "zayif_trend_izin": False,
     }
 
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+
+
+
+
+# ISLEMLER
 
 def tek_hisse_analiz_et(hisse, df, params=None):
     if params is None:
