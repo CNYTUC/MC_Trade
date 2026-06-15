@@ -2,13 +2,28 @@
 # TARIH - SAAT - USER - OLAY
 # log_kayitlari = None
 
-# Tüm kullanıcı verilerini alır
-# ------------------------------------------------------------------
-tum_kullanicilar = None
 
-# Tüm hisse senetlerinin listesini alır
+
+
+# SUPABASEDEN ÇEKİLEN DEĞİŞKENLER
 # ------------------------------------------------------------------
-tum_hisseler = None
+# *** AYARLAR
+gtm_ist_fark = None                # GMT ISTANBUL FARKI
+islem_SaatDakika = None
+
+
+# *** KULLANICILAR
+tum_kullanicilar = None         # TÜM KULLANICILAR VE VERİLERİ
+
+# *** HISSELER
+tum_hisseler = None             # Tüm hisse senetlerinin listesini alır
+
+# *** Tatiller
+tum_tatiller = None
+
+
+# TUTULAN DEĞİŞKENLER
+# ------------------------------------------------------------------
 
 # Verisi çekilebilen hisselerin fiyat tabloları
 # ------------------------------------------------------------------
@@ -41,10 +56,4 @@ analiz_hatalari = None
 
 
 
-
-
-class spbase:
-
-    # GMT ISTANBUL FARKI
-    gtm_ist_fark = 3
 

@@ -1,19 +1,18 @@
-from pycparser.c_ast import While
-
 import conf
+
+from fonksiyonlar import InternetIslem as f_int
+from fonksiyonlar import StringIslem as f_str
+from fonksiyonlar import ZamanIslem as f_zaman
+
+
 import modules.supabaseFnks as sbase
-import fonksiyonlar.f_str as f_str
-import fonksiyonlar.f_internet as f_int
-import fonksiyonlar.f_zaman as f_zaman
-from modules.veri import tum_hisselerin_verisini_cek
-from modules.veri import veri_durumlarini_yazdir
+
 
 # 0) Hoşgeldiniz
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
-IstSaat = f_zaman.IstanbulZamanSTR()
-print(f"Zaman: {IstSaat}\n🚀 MC Trade Uygulamasına Hoşgeldiniz.\n")
+print(f"Zaman: {f_zaman.IstanbulSaatSaniye()}\n🚀 MC Trade Uygulamasına Hoşgeldiniz.\n")
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
@@ -21,30 +20,129 @@ print(f"Zaman: {IstSaat}\n🚀 MC Trade Uygulamasına Hoşgeldiniz.\n")
 # Donguyu Başlat
 while True:
 
+    #DEĞİŞKENLER
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # Dongulerde gun atladı mı kontrol etmek için gerekli.
+    dongu_tarihi = f_zaman.IstanbulGun()
+    # Her turda sıfırlıyoruz
+    ust_donguyu_basa_sar = False
+
+
+
 
     # 1) INTERNET KONTROL
-    internet_kontrol = True
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
-    if internet_kontrol:
+
+    while True:
+        # En hızlı servisler öncelikli kontrol ediliyor
+        internet_var_mi = f_int.kontrolByGoogle() or f_int.kontrolByhttpbin()
+
+        if internet_var_mi:
+
+            Msj = "🌐 İnternet bağlantısı aktif, sistem hazır..."
+            print(f_str.MsjBasari(Msj))
+
+            break
+
+        else:
+
+            Msj = "❌ Bağlantı hatası! 15 sn ara ile tekrar denenecek!!!"
+            print(f_str.MsjIkaz(Msj))
+            f_zaman.Bekle(15)
+
+        if f_zaman.gun_degisti_mi(dongu_tarihi):
+            print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
+            ust_donguyu_basa_sar = True
+            break  # İç döngüyü tamamen kırar ve dışarı fırlatır
+
+    # İç döngü kırıldıktan sonra buraya gelir:
+    if ust_donguyu_basa_sar:
+        continue  # İşte bu komut
+
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+
+
+
+    #2.1) HAFTA SONU KONTROLU
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+
+    while True:
+
+        # bugün hafta sonu değil ise döngüden çık ve işlemlere başla
+        if not f_zaman.HaftaSonuMu(f_zaman.IstanbulZaman()):  # hafta sonu değil ise
+
+            # Bugün tatil değilse döngüden çık ve ana işlemleri başlat
+            print(f"✅ Hafta Sonu değil.")
+            break
+
+
+        else:  # hafta sonu ise
+
+            Msj = "❌ Hafta sonu olduğu için işlem yapılmayacak!!!\n15dk sonra tekrar denenecek..."
+            print(f_str.MsjIkaz(Msj))
+
+            f_zaman.Bekle(15 * 60)
+
+        if f_zaman.gun_degisti_mi(dongu_tarihi):
+            print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
+            ust_donguyu_basa_sar = True
+            break  # İç döngüyü tamamen kırar ve dışarı fırlatır
+
+    # İç döngü kırıldıktan sonra buraya gelir:
+    if ust_donguyu_basa_sar:
+        continue  # İşte bu komut
+
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+
+
+
+
+    #2.2) TATIL GUNU KONTROLU
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+
+    # 'TUM TAILLERI CEK'
+    conf.tum_tatiller = sbase.get_all_holidays()
+    Tatiller = sorted([str(u["TARIH"]) for u in conf.tum_tatiller])
+
+    # eğer tatil listesi boş değilse kontrol yap
+    if len(Tatiller) > 0:
 
         while True:
-            # En hızlı servisler öncelikli kontrol ediliyor
-            internet_var_mi = f_int.kontrolByGoogle() or f_int.kontrolByhttpbin()
 
-            if internet_var_mi:
+            bugun_standart = f_zaman.IstanbulGun()  # ÖR 11/09/2024
+            bugun_standart = f_zaman.tarih_format_değistir(bugun_standart)
 
-                Msj = "🌐 İnternet bağlantısı aktif, sistem hazır."
-                print(f_str.MsjBasari(Msj))
-
+            if not bugun_standart in Tatiller:
+                # Bugün tatil değilse döngüden çık ve ana işlemleri başlat
+                print(f"✅ Resmi tatil değil.")
                 break
 
-            else:
-
-                Msj = "❌ Başarısız: Bağlantı hatası! 10 sn ara ile tekrar denenecek!!!"
+            if bugun_standart in Tatiller:
+                Msj = f"❌ Bugün ({bugun_standart}) resmi tatil! İşlem yapılmayacak. Günün bitmesi bekleniyor...\n15dk sonra tekrar denenecek..."
                 print(f_str.MsjIkaz(Msj))
-                f_zaman.Bekle(10)
+
+                f_zaman.Bekle(15 * 60)
+
+            if f_zaman.gun_degisti_mi(dongu_tarihi):
+                print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
+                ust_donguyu_basa_sar = True
+                break  # İç döngüyü tamamen kırar ve dışarı fırlatır
+
+    # İç döngü kırıldıktan sonra buraya gelir:
+    if ust_donguyu_basa_sar:
+        continue  # İşte bu komut
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
@@ -52,33 +150,49 @@ while True:
 
 
 
-    # 2) ZAMAN KONTROL
-    zaman_kontrol = False
-    # *** BU VERI CANLIYA ALINDIĞINDA True olarak değiştirilmeli
+
+    # 2.3) ZAMAN KONTROL
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
-    if zaman_kontrol:
 
-        saat = int(f_zaman.IstanbulSaat())
-        dakika = int(f_zaman.IstanbulDakika())
+    # İŞLEMİN BAŞLAYACAĞI SAATİ VE GMT IST FARKINI SUPABASE'DEN ÇEK
+    conf.gtm_ist_fark = int(sbase.get_set_by_key("gtm_ist_fark"))  # ÖR: 3
+    conf.islem_SaatDakika = f_zaman.saate_cevir(sbase.get_set_by_key("islem_SaatDakika"))
 
-        while True:
+    islem_saat = conf.islem_SaatDakika #17:15
+    while True:
 
-            # Eğer saat 17:15'ten erken ise...
-            if saat < 17 or (saat == 17 and dakika < 15):
-                print(f"⏰ Saat henüz {saat:02d}:{dakika:02d}. İşlem için 17:15 bekleniyor...")
+        aktif_Saat = f_zaman.saate_cevir(f_zaman.IstanbulSaat())  # Örneğin 16:45
 
-                # İşlemcinin yorulmaması için bekleme
-                f_zaman.Bekle(10)
+        if aktif_Saat >= islem_saat:
 
-            else:
+            Msj = "⏰ Saat geçerli, sistem hazır..."
+            print(f_str.MsjBasari(Msj))
 
+            break
+
+        else:
+
+            saat_farki_dakika = f_zaman.saat_farki_hesapla(islem_saat, aktif_Saat)
+
+            # Olası bir hesaplama hatasına karşı koruma (Negatif değer kontrolü)
+            if saat_farki_dakika <= 0:
                 break
 
-    # -----------------------------------------------------------------------------
-    # -----------------------------------------------------------------------------
-    # -----------------------------------------------------------------------------
+            Msj = f"⏰ Saat henüz {aktif_Saat}. İşlem için {islem_saat} bekleniyor... (Kalan: {saat_farki_dakika} dk)\n5dk sonra tekrar denenecek..."
+
+            f_zaman.Bekle(5 * 60)
+
+        if f_zaman.gun_degisti_mi(dongu_tarihi):
+            print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
+            ust_donguyu_basa_sar = True
+            break  # İç döngüyü tamamen kırar ve dışarı fırlatır
+
+    # İç döngü kırıldıktan sonra buraya gelir:
+    if ust_donguyu_basa_sar:
+        continue  # İşte bu komut
+
 
 
 
@@ -88,32 +202,40 @@ while True:
     # -----------------------------------------------------------------------------
 
     while True:
-        conf.tum_kullanicilar = sbase.get_all_users()
 
-        # 1. Toplam kullanıcı sayısını len() ile direkt alıyoruz
+        conf.tum_kullanicilar = sbase.get_all_users()
         Kullanici_Sayisi = len(conf.tum_kullanicilar)
 
         # 2. Aktif kullanıcıları tek satırda filtreleyip sayısını alıyoruz
         # Supabase'den boolean geldiği için direkt 'if u.get("is_active")' yeterlidir
         AktifKullanici_Sayisi = len([u for u in conf.tum_kullanicilar if u.get("is_active")])
 
-        # 3. Koşul kontrolü (Daha okunabilir hali)
-        if Kullanici_Sayisi == 0 or AktifKullanici_Sayisi == 0:
-            Msj: str = "❌ Başarısız: Adına işlem yapılacak Aktif kullanıcı bulunamadı!!!"
-            print(f_str.MsjHata(Msj))
+        if Kullanici_Sayisi > 0 and AktifKullanici_Sayisi > 0:
 
-            # SİSTEMİ KORUMAK İÇİN KRİTİK DOKUNUŞ:
-            # Kullanıcı bulunamadıysa tekrar sorgulamadan önce 10 saniye bekle
-            print("10 saniye sonra tekrar denenecek...")
-            f_zaman.Bekle(10)
-        else:
-            Msj = f"✅ {AktifKullanici_Sayisi} Aktif kullanıcı için işlem başlatılıyor."
+            Msj = f"✅ {AktifKullanici_Sayisi} Aktif kullanıcı bulundu. İşlem başlatılıyor..."
             print(f_str.MsjBasari(Msj))
             break  # Başarılı ise döngüden çık
 
+        # 3. Koşul kontrolü (Daha okunabilir hali)
+        if Kullanici_Sayisi == 0 or AktifKullanici_Sayisi == 0:
+
+            Msj: str = "❌ Başarısız: Adına işlem yapılacak Aktif kullanıcı bulunamadı!!!\n15dk sonra tekrar denenecek..."
+            print(f_str.MsjHata(Msj))
+            f_zaman.Bekle(15*60)
+
+        if f_zaman.gun_degisti_mi(dongu_tarihi):
+
+            print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
+            ust_donguyu_basa_sar = True
+            break  # İç döngüyü tamamen kırar ve dışarı fırlatır
+
+    # İç döngü kırıldıktan sonra buraya gelir:
+    if ust_donguyu_basa_sar:
+        continue  # İşte bu komut
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
+
 
 
 
@@ -135,36 +257,48 @@ while True:
 
         else:
 
-            Msj: str = "❌ Başarısız: Adına işlem yapılacak Hisse Senedi bulunamadı!!!"
+            Msj: str = "❌ Başarısız: Adına işlem yapılacak Hisse Senedi bulunamadı!!!\n5dk sonra tekrar denenecek..."
             print(f_str.MsjHata(Msj))
 
-            # SİSTEMİ KORUMAK İÇİN KRİTİK DOKUNUŞ:
-            # Kullanıcı bulunamadıysa tekrar sorgulamadan önce 10 saniye bekle
-            print("5dk sonra tekrar denenecek...")
-            f_zaman.Bekle(300)
+            f_zaman.Bekle(5 * 60)
+
+        if f_zaman.gun_degisti_mi(dongu_tarihi):
+            print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
+            ust_donguyu_basa_sar = True
+            break  # İç döngüyü tamamen kırar ve dışarı fırlatır
+
+    # İç döngü kırıldıktan sonra buraya gelir:
+    if ust_donguyu_basa_sar:
+        continue  # İşte bu komut
 
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
 
-        # 5) HİSSE SENEDİ VERİLERİNİ ÇEK
-        # -----------------------------------------------------------------------------
-        # -----------------------------------------------------------------------------
-        # -----------------------------------------------------------------------------
-
-        Msj = "Veriler Alınıyor... \n -------------------"
-        print(f_str.MsjBasari(Msj))
 
 
-        (
-            conf.hisse_verileri,
-            conf.veri_durumlari,
-            conf.basarili_hisseler,
-            conf.veri_hatalari
-        ) = tum_hisselerin_verisini_cek(
-            conf.tum_hisseler,
-            gun=300
-        )
+
+    # 5) HİSSE SENEDİ VERİLERİNİ ÇEK
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+
+    Msj = "Veriler Alınıyor... \n -------------------"
+    print(f_str.MsjBasari(Msj))
+
+
+
+
+
+        #(
+        #    conf.hisse_verileri,
+        #    conf.veri_durumlari,
+        #    conf.basarili_hisseler,
+        #    conf.veri_hatalari
+        #) = tum_hisselerin_verisini_cek(
+        #    conf.tum_hisseler,
+        #    gun=300
+        #    )
     #
     #     veri_durumlarini_yazdir(conf.veri_durumlari)
     #

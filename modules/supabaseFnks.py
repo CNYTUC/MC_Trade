@@ -28,7 +28,34 @@ def get_all_users() -> list[dict]:
 # ─────────────────────────────────────────────────────────────────────────────────────────
 
 def get_all_bist() -> list[dict]:
-    """Tüm kullanıcıları döndürür."""
+    """Tüm senetleri döndürür."""
     client = get_client()
     result = client.table("MC_BistList").select("*").order("id").execute()
     return result.data
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────────
+# ── TUM TATİLLERİ ÇEK ──
+# ─────────────────────────────────────────────────────────────────────────────────────────
+
+def get_all_holidays() -> list[dict]:
+    """Tüm tatilleri döndürür."""
+    client = get_client()
+    result = client.table("MC_Holidays").select("*").order("id").execute()
+    return result.data
+
+
+# ─────────────────────────────────────────────────────────────────────────────────────────
+# ── AYAR_CEK──
+# ─────────────────────────────────────────────────────────────────────────────────────────
+
+# Dönüş tipini dict yerine str yapıyoruz
+def get_set_by_key(key: str) -> str:
+    """AYAR ÇEK"""
+    client = get_client()
+    result = client.table("MC_Settings").select("val").eq("key", key).execute()
+
+    # result.data[0] yerine result.data[0]["val"] diyerek direkt içindeki değeri alıyoruz
+    return result.data[0]["val"] if result.data else None
+
+
