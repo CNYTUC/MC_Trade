@@ -262,10 +262,10 @@ while True:
 
         else:
 
-            Msj: str = "❌ Başarısız: Adına işlem yapılacak Hisse Senedi bulunamadı!!!\n5dk sonra tekrar denenecek..."
+            Msj: str = "❌ Başarısız: Adına işlem yapılacak Hisse Senedi bulunamadı!!!\n15dk sonra tekrar denenecek..."
             print(f_str.MsjHata(Msj))
 
-            f_zaman.Bekle(5 * 60)
+            f_zaman.Bekle(15 * 60)
 
         if f_zaman.gun_degisti_mi(dongu_tarihi):
             print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))

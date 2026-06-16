@@ -10,7 +10,7 @@
 # *** AYARLAR
 gtm_ist_fark = None                # GMT ISTANBUL FARKI
 islem_SaatDakika = None
-
+str_bgun = 300
 
 # *** KULLANICILAR
 tum_kullanicilar = None         # TÜM KULLANICILAR VE VERİLERİ
