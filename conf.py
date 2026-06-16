@@ -1,25 +1,25 @@
+import modules.supabaseFnks as sbase
+
 # LOG KAYITLARI
 # TARIH - SAAT - USER - OLAY
 # log_kayitlari = None
 
-
-
-
 # SUPABASEDEN ÇEKİLEN DEĞİŞKENLER
 # ------------------------------------------------------------------
 # *** AYARLAR
-gtm_ist_fark = None                # GMT ISTANBUL FARKI
-islem_SaatDakika = None
-str_bgun = 300
+def IslemSaati(): return sbase.get_set_by_key("islem_SaatDakika")
+def GtmIstFark(): return int(sbase.get_set_by_key("gtm_ist_fark"))
+def KacGunlukVeri(): return sbase.get_set_by_key("kac_gunluk_veri")
+
+# *** TATILLER
+def tum_tatiller(): return sbase.get_all_holidays()
 
 # *** KULLANICILAR
-tum_kullanicilar = None         # TÜM KULLANICILAR VE VERİLERİ
+def tum_kullanicilar(): return sbase.get_all_users()
 
 # *** HISSELER
-tum_hisseler = None             # Tüm hisse senetlerinin listesini alır
+def tum_hisseler(): return sbase.get_all_bist()
 
-# *** Tatiller
-tum_tatiller = None
 
 
 # TUTULAN DEĞİŞKENLER

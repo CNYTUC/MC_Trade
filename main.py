@@ -114,8 +114,8 @@ while True:
     # -----------------------------------------------------------------------------
 
     # 'TUM TAILLERI CEK'
-    conf.tum_tatiller = sbase.get_all_holidays()
-    Tatiller = sorted([str(u["TARIH"]) for u in conf.tum_tatiller])
+
+    Tatiller = sorted([str(u["TARIH"]) for u in conf.tum_tatiller()])
 
     # eğer tatil listesi boş değilse kontrol yap
     if len(Tatiller) > 0:
@@ -152,51 +152,51 @@ while True:
 
 
 
-    # # 2.3) SAAT KONTROL
-    # # -----------------------------------------------------------------------------
-    # # -----------------------------------------------------------------------------
-    # # -----------------------------------------------------------------------------
-    #
-    # # İŞLEMİN BAŞLAYACAĞI SAATİ VE GMT IST FARKINI SUPABASE'DEN ÇEK
-    # conf.gtm_ist_fark = int(sbase.get_set_by_key("gtm_ist_fark"))  # ÖR: 3
-    # conf.islem_SaatDakika = f_zaman.saate_cevir(sbase.get_set_by_key("islem_SaatDakika"))
-    #
-    # islem_saat = conf.islem_SaatDakika #17:15
-    # while True:
-    #
-    #     aktif_Saat = f_zaman.saate_cevir(f_zaman.IstanbulSaat())  # Örneğin 16:45
-    #
-    #     if aktif_Saat >= islem_saat:
-    #
-    #         Msj = "⏰ Saat geçerli, sistem hazır..."
-    #         print(f_str.MsjBasari(Msj))
-    #
-    #         break
-    #
-    #     else:
-    #
-    #         saat_farki_dakika = f_zaman.saat_farki_hesapla(islem_saat, aktif_Saat)
-    #
-    #         # Olası bir hesaplama hatasına karşı koruma (Negatif değer kontrolü)
-    #         if saat_farki_dakika <= 0:
-    #             break
-    #
-    #         Msj = f"⏰ Saat henüz {aktif_Saat}. İşlem için {islem_saat} bekleniyor... (Kalan: {saat_farki_dakika} dk)\n5dk sonra tekrar denenecek..."
-    #
-    #         f_zaman.Bekle(5 * 60)
-    #
-    #     if f_zaman.gun_degisti_mi(dongu_tarihi):
-    #         print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
-    #         ust_donguyu_basa_sar = True
-    #         break  # İç döngüyü tamamen kırar ve dışarı fırlatır
-    #
-    # # İç döngü kırıldıktan sonra buraya gelir:
-    # if ust_donguyu_basa_sar:
-    #     continue  # İşte bu komut
-    #
-    # # -----------------------------------------------------------------------------
-    # # -----------------------------------------------------------------------------
-    # # -----------------------------------------------------------------------------
+    # 2.3) SAAT KONTROL
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+
+    # İŞLEMİN BAŞLAYACAĞI SAATİ VE GMT IST FARKINI SUPABASE'DEN ÇEK
+    conf.gtm_ist_fark = int(sbase.get_set_by_key("gtm_ist_fark"))  # ÖR: 3
+    conf.islem_SaatDakika = f_zaman.saate_cevir(sbase.get_set_by_key("islem_SaatDakika"))
+
+    islem_saat = conf.islem_SaatDakika #17:15
+    while True:
+
+        aktif_Saat = f_zaman.saate_cevir(f_zaman.IstanbulSaat())  # Örneğin 16:45
+
+        if aktif_Saat >= islem_saat:
+
+            Msj = "⏰ Saat geçerli, sistem hazır..."
+            print(f_str.MsjBasari(Msj))
+
+            break
+
+        else:
+
+            saat_farki_dakika = f_zaman.saat_farki_hesapla(islem_saat, aktif_Saat)
+
+            # Olası bir hesaplama hatasına karşı koruma (Negatif değer kontrolü)
+            if saat_farki_dakika <= 0:
+                break
+
+            Msj = f"⏰ Saat henüz {aktif_Saat}. İşlem için {islem_saat} bekleniyor... (Kalan: {saat_farki_dakika} dk)\n5dk sonra tekrar denenecek..."
+
+            f_zaman.Bekle(5 * 60)
+
+        if f_zaman.gun_degisti_mi(dongu_tarihi):
+            print(f_str.MsjIkaz("📅 Gün değişti. Ana kontroller yeniden başlatılıyor..."))
+            ust_donguyu_basa_sar = True
+            break  # İç döngüyü tamamen kırar ve dışarı fırlatır
+
+    # İç döngü kırıldıktan sonra buraya gelir:
+    if ust_donguyu_basa_sar:
+        continue  # İşte bu komut
+
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
 
 
 
